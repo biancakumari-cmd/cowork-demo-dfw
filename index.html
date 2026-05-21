@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cowork Demo · Deliveroo for Work</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+#gate-screen{position:fixed;inset:0;background:#09090b;display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:20px;text-align:center;padding:40px;font-family:-apple-system,'Inter',sans-serif}
+#gate-screen.gone{display:none}
+.g-icon{width:44px;height:44px;background:#00CCBC;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#000;margin:0 auto 4px}
+.g-title{font-size:22px;font-weight:700;color:#fff}
+.g-sub{font-size:13px;color:#555;max-width:280px;line-height:1.55}
+.g-input{background:#141416;border:1.5px solid #2a2a34;border-radius:8px;padding:12px 16px;font-size:14px;color:#fff;width:260px;outline:none;text-align:center;letter-spacing:.12em;transition:border-color .15s;font-family:inherit}
+.g-input:focus{border-color:#00CCBC55}
+.g-input.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.g-btn{background:#00CCBC;color:#000;border:none;border-radius:8px;padding:12px 0;font-size:14px;font-weight:700;cursor:pointer;width:260px;transition:background .15s;font-family:inherit}
+.g-btn:hover{background:#00b8a8}
+.g-err{font-size:12px;color:#e85555;height:16px}
+</style>
+</head>
+<body>
+
+<div id="gate-screen">
+  <div class="g-icon">C</div>
+  <div class="g-title">Cowork Demo</div>
+  <div class="g-sub">Enter the password to view the Deliveroo for Work prototype walkthrough</div>
+  <input class="g-input" id="pw" type="password" placeholder="Password" autocomplete="off" />
+  <div class="g-err" id="gerr"></div>
+  <button class="g-btn" id="gbtn">View demo →</button>
+</div>
+
+<div id="app"></div>
+
+<script>
+(function(){
+  var P = atob('ZGVsaXZlcm9v');
+  function tryUnlock(){
+    if(document.getElementById('pw').value === P){ launch(); }
+    else {
+      var i=document.getElementById('pw'); var e=document.getElementById('gerr');
+      i.classList.remove('shake'); void i.offsetWidth; i.classList.add('shake');
+      e.textContent='Incorrect — try again'; i.value='';
+    }
+  }
+  document.getElementById('gbtn').addEventListener('click',tryUnlock);
+  document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')tryUnlock();});
+
+  function launch(){
+    document.getElementById('gate-screen').classList.add('gone');
+    var app = document.getElementById('app');
+    app.innerHTML = buildHTML();
+    var s = document.createElement('script');
+    s.textContent = buildJS();
+    document.body.appendChild(s);
+  }
+
+  function buildHTML(){return `
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Inter',sans-serif;background:#0c0c0e;color:#e0e0e0;height:100vh;display:flex;overflow:hidden}
+.sidebar{width:210px;background:#141416;border-right:1px solid #1e1e22;display:flex;flex-direction:column;padding:14px 10px;flex-shrink:0}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:4px 8px 14px;border-bottom:1px solid #1e1e22;margin-bottom:12px}
+.sidebar-logo-icon{width:26px;height:26px;background:#00CCBC;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;flex-shrink:0}
+.sidebar-logo-text{font-size:12px;font-weight:700;color:#fff;line-height:1.2}
+.sidebar-logo-text small{display:block;font-size:9px;font-weight:400;color:#444}
+.sidebar-label{font-size:9px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.1em;padding:0 8px;margin-bottom:5px}
+.sidebar-item{padding:6px 10px;border-radius:5px;font-size:11.5px;color:#555;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+.sidebar-item.active{background:#1e1e24;color:#ccc}
+.sidebar-item.active::before{content:"› ";color:#00CCBC}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:48px;border-bottom:1px solid #1e1e22;display:flex;align-items:center;padding:0 20px;gap:10px;flex-shrink:0}
+.topbar-title{font-size:13px;font-weight:600;color:#bbb}
+.topbar-badge{background:#00CCBC14;color:#00CCBC;font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid #00CCBC2a;text-transform:uppercase;letter-spacing:.06em}
+.topbar-space{flex:1}
+.topbar-hint{font-size:10px;color:#2a2a2e}
+.chat-wrap{flex:1;overflow-y:auto;padding:28px 0 8px}
+.chat-inner{max-width:680px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:22px}
+.msg{display:flex;gap:10px;opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
+.msg.show{opacity:1;transform:none}
+.avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:1px}
+.avatar.u{background:#00CCBC;color:#000}.avatar.a{background:#5b21b6;color:#fff}
+.msg-body{flex:1;min-width:0}
+.msg-name{font-size:10.5px;font-weight:600;color:#444;margin-bottom:3px}
+.msg-text{font-size:13px;line-height:1.65;color:#c8c8c8}
+.msg-text strong{color:#e0e0e0;font-weight:600}
+.msg-text em{color:#888;font-style:normal}
+.msg-text .pill{display:inline-block;background:#1a1a22;border:1px solid #2a2a34;border-radius:4px;padding:1px 7px;font-size:11px;color:#888;margin:0 2px}
+.typing-wrap{display:flex;gap:10px;opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
+.typing-wrap.show{opacity:1;transform:none}
+.dots{display:flex;gap:3px;align-items:center;padding:9px 0}
+.dot{width:5px;height:5px;background:#333;border-radius:50%;animation:blink 1.1s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.25;transform:scale(.8)}30%{opacity:1;transform:scale(1)}}
+.screenshots{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ss-thumb{width:240px;border-radius:7px;overflow:hidden;border:1px solid #2e2e3a;flex-shrink:0}
+.ss-topbar{background:#007a72;padding:7px 10px;display:flex;align-items:center;justify-content:space-between}
+.ss-topbar-logo{font-size:9px;font-weight:700;color:#fff}
+.ss-topbar-nav{display:flex;gap:8px}
+.ss-topbar-nav span{font-size:8px;color:rgba(255,255,255,.6)}
+.ss-topbar-nav span.active-nav{color:#fff;font-weight:600;border-bottom:1.5px solid #fff;padding-bottom:1px}
+.ss-body{background:#f8f8f8;padding:10px}
+.ss-page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.ss-page-head span{font-size:10px;font-weight:700;color:#111}
+.ss-btn{background:#00847a;color:#fff;font-size:8px;font-weight:600;padding:3px 7px;border-radius:3px}
+.ss-table-head{display:flex;background:#eee;padding:4px 6px;border-radius:3px 3px 0 0}
+.ss-table-head span{font-size:7.5px;font-weight:600;color:#666;flex:1}
+.ss-table-row{display:flex;align-items:center;padding:4px 6px;border-bottom:1px solid #e8e8e8}
+.ss-table-row span{font-size:8px;color:#333;flex:1}
+.ss-table-row span.link{color:#00847a}
+.ss-form-field{margin-bottom:6px}
+.ss-form-label{font-size:7.5px;font-weight:700;color:#111;margin-bottom:2px}
+.ss-form-input{background:#fff;border:1px solid #ccc;border-radius:3px;height:14px;width:100%}
+.ss-rules-head{font-size:8px;font-weight:700;color:#111;margin:7px 0 4px}
+.ss-rule-row{display:flex;align-items:center;padding:3px 0;border-bottom:1px solid #eee;gap:4px}
+.ss-rule-row .r-label{font-size:7.5px;font-weight:600;color:#111;width:70px}
+.ss-rule-row .r-val{font-size:7.5px;color:#555;flex:1}
+.ss-rule-row .r-edit{font-size:7px;color:#00847a}
+.ss-caption{font-size:9px;color:#555;margin-top:4px;text-align:center}
+.code-block{margin-top:10px;background:#0d1117;border:1px solid #2a2a34;border-radius:8px;overflow:hidden}
+.code-header{background:#161b22;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #2a2a34}
+.code-dots{display:flex;gap:4px}
+.code-dot{width:8px;height:8px;border-radius:50%}
+.code-dot.r{background:#ff5f57}.code-dot.y{background:#ffbd2e}.code-dot.g{background:#28c840}
+.code-filename{font-size:10.5px;color:#555;font-family:monospace;margin-left:4px}
+.code-body{padding:12px 14px;overflow-x:auto}
+.code-body pre{font-family:monospace;font-size:11px;line-height:1.7;color:#e6edf3}
+.ln{color:#30363d;user-select:none;margin-right:16px;display:inline-block;width:18px;text-align:right}
+.t{color:#7ee787}.at{color:#79c0ff}.st{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}
+.cursor{display:inline-block;width:7px;height:13px;background:#58a6ff;opacity:.8;animation:cb .9s step-end infinite;vertical-align:text-bottom;margin-left:1px}
+@keyframes cb{0%,100%{opacity:.8}50%{opacity:0}}
+.task-block{margin-top:10px;background:#161620;border:1px solid #252530;border-radius:8px;overflow:hidden}
+.task-hdr{background:#1c1c28;padding:7px 12px;font-size:10px;font-weight:600;color:#444;display:flex;align-items:center;gap:5px;border-bottom:1px solid #252530}
+.task-row{padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1e1e28;font-size:12px;transition:color .3s}
+.task-row:last-child{border-bottom:none}
+.task-row.pending{color:#444}.task-row.running{color:#e0e0e0}.task-row.done{color:#555}
+.ti{width:14px;height:14px;flex-shrink:0}
+.task-row.pending .ti{color:#2a2a36}.task-row.running .ti{color:#f59e0b}.task-row.done .ti{color:#00CCBC}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.artifact{margin-top:10px;border:1px solid #00CCBC2e;background:linear-gradient(120deg,#00CCBC08,#5b21b608);border-radius:9px;padding:13px;display:flex;align-items:center;gap:11px}
+.artifact-icon{width:36px;height:36px;background:#00CCBC12;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00CCBC}
+.artifact-body{flex:1;min-width:0}
+.artifact-name{font-size:12.5px;font-weight:600;color:#ddd}
+.artifact-meta{font-size:10.5px;color:#444;margin-top:2px}
+.artifact-open{background:#00CCBC;color:#000;border:none;border-radius:5px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;text-decoration:none;flex-shrink:0;white-space:nowrap}
+.artifact.refreshed{border-color:#00CCBC66;background:linear-gradient(120deg,#00CCBC12,#5b21b610)}
+.refresh-badge{background:#00CCBC20;color:#00CCBC;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;border:1px solid #00CCBC44;margin-top:4px;display:inline-block}
+.file-loc{margin-top:8px;background:#111118;border:1px solid #1e1e2a;border-radius:7px;padding:10px 13px;display:flex;align-items:center;gap:10px}
+.file-loc-body{flex:1}
+.file-loc-path{font-family:monospace;font-size:10.5px;color:#7ec8e3}
+.file-loc-note{font-size:10px;color:#444;margin-top:2px}
+.q-block{margin-top:10px;background:#161622;border:1px solid #22222e;border-radius:9px;padding:13px}
+.q-hdr{font-size:9px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px}
+.q-text{font-size:12.5px;font-weight:500;color:#bbb;margin-bottom:9px}
+.q-opts{display:flex;flex-direction:column;gap:5px}
+.q-opt{background:#1e1e28;border:1.5px solid #282836;border-radius:6px;padding:8px 11px;cursor:pointer;transition:border-color .15s,background .15s}
+.q-opt:hover{border-color:#00CCBC66;background:#00CCBC07}
+.q-opt.sel{border-color:#00CCBC;background:#00CCBC10}
+.q-opt-title{font-size:12px;font-weight:600;color:#d0d0d0;margin-bottom:1px;display:flex;align-items:center;gap:6px}
+.q-opt-title .rec{font-size:9px;color:#00CCBC;font-weight:500}
+.q-opt-desc{font-size:11px;color:#555;line-height:1.4}
+.callout{margin-top:10px;background:#0d1f1e;border:1px solid #00CCBC1a;border-left:3px solid #00CCBC55;border-radius:0 7px 7px 0;padding:9px 13px}
+.callout-label{font-size:9px;font-weight:700;color:#00CCBC88;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.callout-text{font-size:11.5px;color:#6a6a6a;line-height:1.55}
+.fork{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.fork-opt{background:#161622;border:1.5px solid #252530;border-radius:8px;padding:12px 14px;cursor:pointer;transition:border-color .2s,background .2s}
+.fork-opt:hover{border-color:#00CCBC44;background:#00CCBC05}
+.fork-opt-title{font-size:12.5px;font-weight:600;color:#d0d0d0;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.fork-opt-desc{font-size:11px;color:#555;line-height:1.45}
+.fork-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
+.fork-badge.fast{background:#00CCBC15;color:#00CCBC;border:1px solid #00CCBC30}
+.fork-badge.formal{background:#5b21b615;color:#a78bfa;border:1px solid #5b21b630}
+.bottom{height:56px;border-top:1px solid #1a1a1e;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;background:#0c0c0e}
+.step-dots{display:flex;gap:4px}
+.sdot{width:5px;height:5px;border-radius:50%;background:#1e1e22;transition:background .3s}
+.sdot.active{background:#00CCBC}.sdot.done{background:#1e3d3a}
+.step-txt{font-size:10px;color:#333}
+.next-btn{background:#00CCBC;color:#000;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s,opacity .15s}
+.next-btn:hover{background:#00b8a8}
+.next-btn:disabled{opacity:.3;cursor:not-allowed}
+.intro{position:fixed;inset:0;background:#09090b;z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px}
+.intro.gone{display:none}
+.intro-eyebrow{font-size:11px;font-weight:700;color:#00CCBC;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px}
+.intro-h{font-size:34px;font-weight:800;color:#fff;line-height:1.15;max-width:500px;margin-bottom:12px}
+.intro-h em{font-style:normal;color:#00CCBC}
+.intro-sub{font-size:14px;color:#555;max-width:380px;line-height:1.6;margin-bottom:28px}
+.intro-cta{background:#00CCBC;color:#000;border:none;border-radius:9px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer}
+.intro-cta:hover{background:#00b8a8}
+.intro-hint{margin-top:12px;font-size:10px;color:#2a2a2e}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#1e1e22;border-radius:2px}
+</style>
+<div class="intro" id="intro">
+  <div class="intro-eyebrow">Deliveroo for Work · Cowork</div>
+  <div class="intro-h">How a PM builds a<br><em>prototype in minutes</em><br>with Claude</div>
+  <div class="intro-sub">Brief → screenshots → build → iterate → ship. No design tool. No developer. No PRD.</div>
+  <button class="intro-cta" id="intro-cta">Start walkthrough ›</button>
+  <div class="intro-hint">Click "Next step" to advance · ESC to restart</div>
+</div>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">C</div>
+    <div class="sidebar-logo-text">Cowork <small>by Anthropic</small></div>
+  </div>
+  <div class="sidebar-label">Recent</div>
+  <div class="sidebar-item active">DfW Vouchers prototype</div>
+  <div class="sidebar-item">Sprint planning Q2</div>
+  <div class="sidebar-item">Customer NPS digest</div>
+  <div class="sidebar-item">Onboarding flow review</div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">DfW Vouchers prototype</div>
+    <div class="topbar-badge">Demo</div>
+    <div class="topbar-space"></div>
+    <div class="topbar-hint">Click "Next step" to advance</div>
+  </div>
+  <div class="chat-wrap" id="chat-wrap"><div class="chat-inner" id="ci"></div></div>
+  <div class="bottom">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="step-dots" id="sdots"></div>
+      <div class="step-txt" id="stxt">0 of 13</div>
+    </div>
+    <button class="next-btn" id="nxt">Next step <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+</div>`;}
+
+  function buildJS(){return `(function(){
+const TOTAL=13;let step=0,busy=false;
+const intro=document.getElementById('intro'),ci=document.getElementById('ci'),wrap=document.getElementById('chat-wrap'),nxt=document.getElementById('nxt'),sdots=document.getElementById('sdots'),stxt=document.getElementById('stxt');
+for(let i=0;i<TOTAL;i++){const d=document.createElement('div');d.className='sdot';d.id='sd'+i;sdots.appendChild(d);}
+function nav(){stxt.textContent=step+' of '+TOTAL;for(let i=0;i<TOTAL;i++){const d=document.getElementById('sd'+i);d.className='sdot'+(i<step?' done':i===step-1?' active':'');}nxt.disabled=busy||step>=TOTAL;if(step>=TOTAL){nxt.innerHTML='✓ Done';nxt.style.background='#1a2e2a';nxt.style.color='#00CCBC';}}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function scroll(){wrap.scrollTo({top:wrap.scrollHeight,behavior:'smooth'});}
+function msg(role,name){const w=document.createElement('div');w.className='msg';w.innerHTML='<div class="avatar '+(role==='user'?'u':'a')+'">'+(role==='user'?'BK':'C')+'</div><div class="msg-body"><div class="msg-name">'+name+'</div><div class="msg-text"></div></div>';ci.appendChild(w);requestAnimationFrame(()=>w.classList.add('show'));return{wrap:w,text:w.querySelector('.msg-text'),body:w.querySelector('.msg-body')};}
+async function typing(){const w=document.createElement('div');w.className='typing-wrap';w.innerHTML='<div class="avatar a">C</div><div class="msg-body"><div class="msg-name">Claude</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>';ci.appendChild(w);requestAnimationFrame(()=>w.classList.add('show'));scroll();return w;}
+async function animTask(id,dur){const el=document.getElementById(id);if(!el)return;const lbl=el.querySelector('span').textContent;el.className='task-row running';el.innerHTML='<svg class="ti spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.2-8.6"/></svg><span>'+lbl+'</span>';scroll();await sleep(dur);el.className='task-row done';el.innerHTML='<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>'+lbl+'</span>';}
+async function s1(){const{text,body}=msg('user','Bianca Kumari · PM, Deliveroo for Work');text.innerHTML='Can you build me an <strong>interactive prototype</strong> for a new feature — Vouchers in our admin portal?<br><br>No requirements doc yet. Business case is attached.';const c=document.createElement('div');c.style.cssText='margin-top:10px;background:#111820;border:1px solid #1e2a3a;border-radius:8px;padding:10px 13px;display:flex;align-items:center;gap:10px;max-width:340px';c.innerHTML='<div style="width:32px;height:32px;background:#1e3a5a;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7ea8d8" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#7ea8d8">DfW Vouchers (2026 Planning)</div><div style="font-size:10px;color:#3a5a7a;margin-top:1px">Google Doc · Business case · synced</div></div>';body.appendChild(c);scroll();}
+async function s2(){const t=await typing();await sleep(1400);t.remove();const{text,body}=msg('assistant','Claude');text.innerHTML='Got it — I\\'ve read through the business case.<br><br><strong>One thing before I start:</strong> can you share a screenshot of your existing admin portal? I\\'ll replicate the exact layout and component patterns so the prototype feels native.';const cl=document.createElement('div');cl.className='callout';cl.innerHTML='<div class="callout-label">💡 More context = better output</div><div class="callout-text">Business case + screenshots means a first build you can actually put in front of your engineer.</div>';body.appendChild(cl);const q=document.createElement('div');q.className='q-block';q.style.marginTop='10px';q.innerHTML='<div class="q-hdr">Share your design reference</div><div class="q-text">Which do you have handy?</div><div class="q-opts"><div class="q-opt" data-v="ss"><div class="q-opt-title">Screenshots of current portal <span class="rec">Quick option</span></div><div class="q-opt-desc">A couple of screenshots is enough.</div></div><div class="q-opt" data-v="fig"><div class="q-opt-title">Figma file / link</div><div class="q-opt-desc">I can read Figma directly for exact colours and spacing.</div></div></div>';body.appendChild(q);q.querySelectorAll('.q-opt').forEach(c=>{c.addEventListener('click',()=>{q.querySelectorAll('.q-opt').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');});});scroll();}
+async function s3(){const ss=document.querySelector('.q-opt[data-v="ss"]');if(ss)ss.classList.add('sel');await sleep(200);const{text,body}=msg('user','Bianca Kumari · PM, Deliveroo for Work');text.innerHTML='Going with screenshots. Here are two: the allowances list page and the creation form.';const sc=document.createElement('div');sc.className='screenshots';sc.innerHTML='<div class="ss-thumb"><div class="ss-topbar"><span class="ss-topbar-logo">deliveroo for work</span><div class="ss-topbar-nav"><span>Users</span><span class="active-nav">Meal allowances</span><span>Orders</span></div></div><div class="ss-body"><div class="ss-page-head"><span>Meal allowances</span><span class="ss-btn">+ Add new</span></div><div class="ss-table-head"><span>Name</span><span>Details</span><span>From</span><span>To</span></div><div class="ss-table-row"><span class="link">Test</span><span>£20 daily</span><span>19-03-26</span><span>19-03-31</span></div><div class="ss-table-row"><span class="link">Friday lunch</span><span>£12 daily</span><span>10-03-26</span><span>10-03-31</span></div></div><div class="ss-caption">List view</div></div><div class="ss-thumb"><div class="ss-topbar"><span class="ss-topbar-logo">deliveroo for work</span></div><div class="ss-body"><div class="ss-form-field"><div class="ss-form-label">Voucher name *(required)</div><div class="ss-form-input"></div></div><div class="ss-rules-head">Voucher rules</div><div class="ss-rule-row"><span class="r-label">Frequency</span><span class="r-val">Daily</span><span class="r-edit">Edit</span></div><div class="ss-rule-row"><span class="r-label">Restrictions</span><span class="r-val">Alcohol, Retail</span><span class="r-edit">Edit</span></div></div><div class="ss-caption">Creation form</div></div>';body.appendChild(sc);scroll();}
+async function s4(){const t=await typing();await sleep(1300);t.remove();const{text}=msg('assistant','Claude');text.innerHTML='Design language clear — teal header, white card layout, rules list with Edit buttons, teal link text in tables.<br><br>Which rules should the Vouchers form include? <span class="pill">Frequency</span><span class="pill">Date</span><span class="pill">Timing</span><span class="pill">Locations</span><span class="pill">Groups</span><span class="pill">Project codes</span><span class="pill">Memo</span><span class="pill">Restrictions</span>';scroll();}
+async function s5(){const{text}=msg('user','Bianca Kumari · PM, Deliveroo for Work');text.innerHTML='All except Groups, Locations, and Memo — so <strong>Frequency, Date, Timing, Project codes, Restrictions</strong>. Plus a Recipients section.';scroll();}
+async function s6(){const t=await typing();await sleep(900);t.remove();const{text,body}=msg('assistant','Claude');text.innerHTML='Got it. One question before I wire up the Recipients section — should each person get their <strong>own unique link</strong>, or a <strong>shared link</strong> anyone can claim?<br><br>Your business case mentions reducing over-claiming, which points to unique links.';const cl=document.createElement('div');cl.className='callout';cl.innerHTML='<div class="callout-label">The prototype working</div><div class="callout-text">These questions surface requirements you haven\\'t written down yet — answering them now prevents mid-sprint surprises.</div>';body.appendChild(cl);scroll();}
+async function s7(){const{text}=msg('user','Bianca Kumari · PM, Deliveroo for Work');text.innerHTML='Unique links per person. But include <strong>both options</strong>: shared link (for Slack posts) and individual email links.';scroll();}
+async function s8(){const t=await typing();await sleep(1000);t.remove();const{text,body}=msg('assistant','Claude');text.innerHTML='On it — building both modes.';const cb=document.createElement('div');cb.className='code-block';cb.innerHTML='<div class="code-header"><div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div><span class="code-filename">voucher-creation-form.html</span></div><div class="code-body"><pre><span class="ln">1</span><span class="cm">&lt;!-- Voucher campaign form — DfW admin portal --&gt;</span>\n<span class="ln">2</span><span class="t">&lt;label&gt;</span>Campaign name <span class="t">&lt;span&gt;</span>*(required)<span class="t">&lt;/span&gt;&lt;/label&gt;</span>\n<span class="ln">3</span><span class="t">&lt;h2&gt;</span>Voucher rules<span class="t">&lt;/h2&gt;</span>\n<span class="ln">4</span><span class="cm">&lt;!-- Frequency · Date · Timing · Project codes · Restrictions --&gt;</span>\n<span class="ln">5</span><span class="t">&lt;div</span> <span class="at">class=</span><span class="st">"dist-toggle"</span><span class="t">&gt;</span>Shared link<span class="t">&lt;/div&gt;</span>\n<span class="ln">6</span><span class="t">&lt;div</span> <span class="at">class=</span><span class="st">"dist-toggle active"</span><span class="t">&gt;</span>Email (unique per person)<span class="t">&lt;/div&gt;</span>\n<span class="ln">7</span><span class="cm">&lt;!-- ... --&gt;</span><span class="cursor"></span></pre></div>';body.appendChild(cb);await sleep(400);const tb=document.createElement('div');tb.className='task-block';tb.innerHTML='<div class="task-hdr">Tasks</div><div class="task-row pending" id="tk1"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><span>Apply DfW visual design (teal header, card layout)</span></div><div class="task-row pending" id="tk2"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><span>Build voucher list view with data table</span></div><div class="task-row pending" id="tk3"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><span>Build creation form: 5 rules + Recipients</span></div><div class="task-row pending" id="tk4"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><span>Wire both distribution modes (shared + unique email)</span></div><div class="task-row pending" id="tk5"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><span>Interactive flows + prototype watermark</span></div>';body.appendChild(tb);scroll();await sleep(600);await animTask('tk1',900);await animTask('tk2',1100);await animTask('tk3',1400);await animTask('tk4',800);await animTask('tk5',500);}
+async function s9(){const t=await typing();await sleep(1100);t.remove();const{text,body}=msg('assistant','Claude');text.innerHTML='Done. Teal header, white card rules, same table pattern. Both distribution modes working — <strong>fully interactive</strong>.';const ar=document.createElement('div');ar.className='artifact';ar.innerHTML='<div class="artifact-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="artifact-body"><div class="artifact-name">dfw-vouchers-prototype.html</div><div class="artifact-meta">Interactive · Both distribution modes · Prototype watermark</div></div><a class="artifact-open" href="#">Open prototype →</a>';body.appendChild(ar);await sleep(300);const fl=document.createElement('div');fl.className='file-loc';fl.innerHTML='<div class="file-loc-body"><div class="file-loc-path">~/Cowork workspace › dfw-vouchers-prototype.html</div><div class="file-loc-note">Single file — send it directly or open in a browser.</div></div>';body.appendChild(fl);scroll();}
+async function s10(){const{text}=msg('user','Bianca Kumari · PM, Deliveroo for Work');text.innerHTML='This looks exactly like our portal — great. Two changes:<br><br><strong>1.</strong> "Voucher name" → "Campaign name"<br><strong>2.</strong> Add a summary table: Campaign · Value · Quantity · Redeemed · Status';scroll();}
+async function s11(){const t=await typing();await sleep(900);t.remove();const{text,body}=msg('assistant','Claude');text.innerHTML='Done — both in.';const ar2=document.createElement('div');ar2.className='artifact refreshed';ar2.innerHTML='<div class="artifact-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="artifact-body"><div class="artifact-name">dfw-vouchers-prototype.html</div><div class="artifact-meta">Campaign name updated · Summary table added</div><div class="refresh-badge">✓ Same file — no new link</div></div><a class="artifact-open" href="#">Open →</a>';body.appendChild(ar2);await sleep(200);const cl=document.createElement('div');cl.className='callout';cl.innerHTML='<div class="callout-label">No version chaos</div><div class="callout-text">Every iteration updates the same file. Anyone with the link is already on the latest version.</div>';body.appendChild(cl);scroll();}
+async function s12(){const t=await typing();await sleep(700);t.remove();const{text,body}=msg('assistant','Claude');text.innerHTML='Prototype ready. How do you want to hand off to engineering?';const fk=document.createElement('div');fk.className='fork';fk.innerHTML='<div class="fork-opt" onclick="this.style.borderColor=\\'#00CCBC\\';this.style.background=\\'#00CCBC06\\'"><div class="fork-opt-title">Send file to engineer <span class="fork-badge fast">Fastest</span></div><div class="fork-opt-desc">They open it, use Claude to generate the TDD — the prototype is the spec.</div></div><div class="fork-opt" id="fork-prd" onclick="this.style.borderColor=\\'#a78bfa\\';this.style.background=\\'#5b21b606\\'"><div class="fork-opt-title">Generate a PRD <span class="fork-badge formal">More formal</span></div><div class="fork-opt-desc">Problem statement, user stories, functional spec, open questions — shareable to Docs or Slack.</div></div>';body.appendChild(fk);scroll();}
+async function s13(){const p=document.getElementById('fork-prd');if(p){p.style.borderColor='#a78bfa';p.style.background='#5b21b606';}await sleep(300);const pm=msg('user','Bianca Kumari · PM, Deliveroo for Work');pm.text.innerHTML='Generate a PRD — I want something my engineer can reference alongside the prototype.';scroll();await sleep(500);const t=await typing();await sleep(1400);t.remove();const cl=msg('assistant','Claude');cl.text.innerHTML='Done — PRD drafted. Three open questions flagged for engineering to resolve before sprint planning.';await sleep(300);const prd=document.createElement('div');prd.style.cssText='margin-top:10px;background:#111118;border:1px solid #252530;border-radius:9px;overflow:hidden';prd.innerHTML='<div style="background:#1a1a26;padding:10px 14px;border-bottom:1px solid #252530;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:12px;font-weight:700;color:#ddd">DfW Vouchers — PRD v0.1</div><div style="font-size:10px;color:#444;margin-top:1px">Generated from prototype · May 2026</div></div><span style="background:#00CCBC14;color:#00CCBC;font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid #00CCBC2a">Draft</span></div><div style="padding:12px 14px;display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a22;align-items:baseline"><span style="color:#00CCBC;font-size:11px;width:14px;flex-shrink:0">✓</span><span style="font-size:12px;font-weight:600;color:#bbb;width:160px;flex-shrink:0">Problem statement</span><span style="font-size:11px;color:#555">Why we\\'re building · target clients · £1.35m opportunity</span></div><div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a22;align-items:baseline"><span style="color:#00CCBC;font-size:11px;width:14px;flex-shrink:0">✓</span><span style="font-size:12px;font-weight:600;color:#bbb;width:160px;flex-shrink:0">Functional requirements</span><span style="font-size:11px;color:#555">5 rules · Both distribution modes · Unique email links · Invoice on redeemed only</span></div><div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a22;align-items:baseline"><span style="color:#00CCBC;font-size:11px;width:14px;flex-shrink:0">✓</span><span style="font-size:12px;font-weight:600;color:#bbb;width:160px;flex-shrink:0">Out of scope v1</span><span style="font-size:11px;color:#555">Multi-currency · User group targeting · Mobile admin</span></div><div style="display:flex;gap:8px;padding:5px 0;align-items:baseline"><span style="color:#f59e0b;font-size:11px;width:14px;flex-shrink:0">⬜</span><span style="font-size:12px;font-weight:600;color:#bbb;width:160px;flex-shrink:0">Open questions (3)</span><span style="font-size:11px;color:#555;font-style:italic">Link forwarded externally? · Max vouchers per campaign? · Who invoices?</span></div></div>';cl.body.appendChild(prd);scroll();}
+async function go(){if(busy||step>=TOTAL)return;busy=true;nxt.disabled=true;step++;nav();switch(step){case 1:await s1();break;case 2:await s2();break;case 3:await s3();break;case 4:await s4();break;case 5:await s5();break;case 6:await s6();break;case 7:await s7();break;case 8:await s8();break;case 9:await s9();break;case 10:await s10();break;case 11:await s11();break;case 12:await s12();break;case 13:await s13();break;}busy=false;nav();scroll();}
+function reset(){step=0;busy=false;ci.innerHTML='';intro.classList.remove('gone');nxt.innerHTML='Next step';nxt.style.background='';nxt.style.color='';nav();}
+document.getElementById('intro-cta').addEventListener('click',()=>{intro.classList.add('gone');go();});
+nxt.addEventListener('click',go);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')reset();});
+nav();
+})();`;}
+})();
+</script>
+</body>
+</html>
